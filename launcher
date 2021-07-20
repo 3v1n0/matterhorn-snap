@@ -16,6 +16,9 @@ urlOpenCommand = xdg-open
 activityNotifyCommand = ${SNAP%/*}/current/app/notification-scripts/notify
 
 showTypingIndicator = True
+
+enableAspell = True
+#aspellDictionary = "en"
 EOF
 
     echo "A default configuration file has been created at"
