@@ -16,6 +16,14 @@ apps:
       - network
       - password-manager-service
       - x11
+    environment:
+      EDITOR: $SNAP/usr/bin/nvim # Would be nice to be able to use the host $EDITOR
+
+layout:
+  /usr/libexec/neovim:
+    bind: $SNAP/usr/libexec/neovim
+  /usr/share/nvim:
+    bind: $SNAP/usr/share/nvim
 
 parts:
   matterhorn:
@@ -57,6 +65,11 @@ parts:
       - zlib1g-dev
     stage-packages:
       - libatomic1
+
+  integration-tools:
+    plugin: nil
+    stage-packages:
       - libsecret-tools
       - libnotify-bin
+      - neovim
       - xclip
