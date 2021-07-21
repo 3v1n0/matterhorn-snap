@@ -9,7 +9,7 @@ if ! [ -e "$config_file" ]; then
 #host = matterhorn.yourhost.org
 #team = the default team
 
-# Set with: snap run --shell $SNAP_NAME -c "secret-tool lookup $SNAP_INSTANCE_NAME token"
+# Set with: snap run --shell matterhorn -c 'secret-tool store --label="\$SNAP_NAME" \$SNAP_NAME <token>
 #tokencmd = secret-tool lookup $SNAP_NAME token
 
 urlOpenCommand = xdg-open
@@ -23,10 +23,12 @@ EOF
 
     echo "A default configuration file has been created at"
     echo "  $config_file"
+    echo
     echo "Use with your \$EDITOR to customize it"
     echo
     echo "Call this command to setup an access token:"
-    echo "  snap run --shell $SNAP_NAME -c 'secret-tool lookup $SNAP_INSTANCE_NAME token'"
+    echo "  snap run --shell matterhorn -c \\"
+    echo "    'secret-tool store --label=\"\$SNAP_NAME\" \$SNAP_NAME <token>'"
     echo
     echo "Press any key to run $SNAP_NAME..."
     read -n1 foo
