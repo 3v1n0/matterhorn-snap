@@ -4,6 +4,9 @@ adopt-info: matterhorn
 summary: Matterhorn
 description: |
   A feature-rich Unix terminal client for the Mattermost chat system
+
+  See https://snapcraft.io/matterhorn for more information how to configure and
+  use it.
 grade: stable
 confinement: strict
 
