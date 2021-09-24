@@ -20,6 +20,7 @@ apps:
       - password-manager-service
       - x11
     environment:
+      LANG: C.UTF-8
       EDITOR: $SNAP/usr/bin/nvim # Would be nice to be able to use the host $EDITOR
 
 layout:
