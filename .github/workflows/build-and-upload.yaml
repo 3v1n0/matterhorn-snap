@@ -11,13 +11,21 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+        - amd64
+        - armhf
+        - arm64
     env:
       TERM: dumb
     steps:
     - uses: actions/checkout@v2
     - name: Snapcraft build
-      uses: snapcore/action-build@v1
+      uses: diddlesnaps/snapcraft-multiarch-action@v1
       id: snapcraft-build
+      with:
+        architecture: ${{ matrix.platform }}
     - name: Install
       run: |
         set -x
@@ -43,7 +51,7 @@ jobs:
           echo "Stable version of $snap_name found, so let's promote it"
           echo "${{ secrets.SNAPCRAFT_LOGIN }}" > "$login"
           snapcraft login --with "$login"
-          rm "$login"
+          shred -zvu -n 5 "$login"
           # Sleep a bit, waiting the revision to be visible
           set -x
           sleep 40
