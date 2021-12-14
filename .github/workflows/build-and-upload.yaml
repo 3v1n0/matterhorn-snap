@@ -1,0 +1,55 @@
+name: Build and push to store
+
+on: [push, pull_request]
+# on:
+#   push:
+#     branches: [ master ]
+#   pull_request:
+#   schedule:
+#     - cron: 0 5 * * 0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TERM: dumb
+    steps:
+    - uses: actions/checkout@v2
+    - name: Snapcraft build
+      uses: snapcore/action-build@v1
+      id: snapcraft-build
+    - name: Install
+      run: |
+        set -x
+        sudo snap install --dangerous ${{ steps.snapcraft-build.outputs.snap }}
+    - name: Test basic commands
+      run: |
+        matterhorn -h
+        matterhorn -v
+        matterhorn -m -f markdown
+        matterhorn -k
+    - name: Publish
+      uses: snapcore/action-publish@v1
+      with:
+        store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
+        snap: ${{ steps.snapcraft-build.outputs.snap }}
+        release: edge
+    - name: Promote stable versions
+      run: |
+        snap_file=${{ steps.snapcraft-build.outputs.snap }}
+        snap_name=$(echo "$snap_file" | grep "[a-z0-9]\+_" -o | head -1 | sed "s/_//")
+        if echo "$snap_file" | grep -q "[a-z0-9]\+_[0-9.]\+_.*\.snap"; then
+          login=$(mktemp)
+          echo "Stable version of $snap_name found, so let's promote it"
+          echo "${{ secrets.SNAPCRAFT_LOGIN }}" > "$login"
+          snapcraft login --with "$login"
+          rm "$login"
+          # Sleep a bit, waiting the revision to be visible
+          set -x
+          sleep 40
+          last_revision=$(snapcraft list-revisions $snap_name \
+            --arch="$(dpkg --print-architecture)" | \
+              head -n2 | tail -n1 | cut -f1 -d ' ')
+          snapcraft release $snap_name $last_revision stable
+          snapcraft logout
+        fi
