@@ -2,7 +2,7 @@ name: Build and push to store
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, stable ]
   pull_request:
   schedule:
     - cron: 0 5 * * 0
