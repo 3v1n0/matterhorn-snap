@@ -57,7 +57,7 @@ parts:
       # Workarounds https://github.com/haskell/cabal/issues/5516
       echo "" | cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-repl -w ghc --build-dep fail
       cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-install Cabal cabal-install
-      ln -svf $HOME/.cabal/bin/cabal $(command -v cabal)
+      ln -svf $HOME/.cabal/bin/cabal /usr/local/bin/
       cabal --version
       cabal user-config update
 
@@ -77,7 +77,6 @@ parts:
     override-build: |
       set -eu
       export LANG=C.UTF-8
-      export PATH=$HOME/.cabal/bin:$PATH
       export CABALARGS="-j${SNAPCRAFT_PARALLEL_BUILD_COUNT}"
 
       cd "${SNAPCRAFT_PART_BUILD}"
