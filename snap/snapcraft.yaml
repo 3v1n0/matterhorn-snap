@@ -66,7 +66,7 @@ parts:
       cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-update
 
       # Workarounds https://github.com/haskell/cabal/issues/5516
-      mkdir -p $HOME/.cabal/store/$(readlink /usr/bin/ghc)/package.db
+      echo "" | cabal new-repl -w ghc --build-dep fail
       cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-install Cabal cabal-install
       ln -svf $HOME/.cabal/bin/cabal $(command -v cabal)
       cabal --version
