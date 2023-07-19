@@ -27,6 +27,12 @@ jobs:
         matterhorn -v
         matterhorn -m -f markdown
         matterhorn -k
+    - name: Test secret tool usage
+      run: |
+        set -xe
+        test -z "$(snap run --shell matterhorn -c 'secret-tool lookup $SNAP_NAME token')"
+        echo myPreciousToken | snap run --shell matterhorn -c 'secret-tool store --label="$SNAP_NAME" $SNAP_NAME token'
+        test "$(snap run --shell matterhorn -c 'secret-tool lookup $SNAP_NAME token')" = "myPreciousToken"
     - name: Publish
       if: github.event_name != 'pull_request'
       uses: snapcore/action-publish@v1
