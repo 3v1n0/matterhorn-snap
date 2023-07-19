@@ -64,7 +64,10 @@ parts:
       # FIXME: We need a way to make snapcraft not to use --recursive, but
       # We keep the source and branch stuff for future and to get git deps
       # snapcraftctl pull
-      git clone https://github.com/matterhorn-chat/matterhorn.git -b develop ${SNAPCRAFT_PART_SRC}
+      git clone --bare https://github.com/matterhorn-chat/matterhorn.git \
+        "${SNAPCRAFT_PART_SRC}/.git" -b develop
+      git -C ${SNAPCRAFT_PART_SRC} config --unset core.bare
+      git -C "${SNAPCRAFT_PART_SRC}" checkout
 
       sed -i -e /url/s,git@github.com:,https://github.com/, ${SNAPCRAFT_PART_SRC}/.gitmodules
       git -C ${SNAPCRAFT_PART_SRC} submodule update --init
