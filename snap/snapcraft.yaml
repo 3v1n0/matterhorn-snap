@@ -1,5 +1,5 @@
 name: matterhorn
-base: core20
+base: core22
 adopt-info: matterhorn
 summary: Matterhorn
 description: |
@@ -53,44 +53,39 @@ parts:
     plugin: nil
     override-pull: |
       cabal --version
-      cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-update
-
-      # Workarounds https://github.com/haskell/cabal/issues/5516
-      echo "" | cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-repl -w ghc --build-dep fail
-      cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-install Cabal cabal-install
-      ln -svf $HOME/.cabal/bin/cabal /usr/local/bin/
-      cabal --version
-      cabal user-config update
+      cabal -j${CRAFT_PARALLEL_BUILD_COUNT} update
+      cabal -j${CRAFT_PARALLEL_BUILD_COUNT} new-install Cabal cabal-install \
+        --installdir=/usr/local/bin
 
       # FIXME: We need a way to make snapcraft not to use --recursive, but
       # We keep the source and branch stuff for future and to get git deps
-      # snapcraftctl pull
+      # craftctl default
       git clone --bare https://github.com/matterhorn-chat/matterhorn.git \
-        "${SNAPCRAFT_PART_SRC}/.git" -b develop
-      git -C ${SNAPCRAFT_PART_SRC} config --unset core.bare
-      git -C "${SNAPCRAFT_PART_SRC}" checkout
+        "${CRAFT_PART_SRC}/.git" -b develop
+      git -C ${CRAFT_PART_SRC} config --unset core.bare
+      git -C "${CRAFT_PART_SRC}" checkout
 
-      sed -i -e /url/s,git@github.com:,https://github.com/, ${SNAPCRAFT_PART_SRC}/.gitmodules
-      git -C ${SNAPCRAFT_PART_SRC} submodule update --init
-      for p in "${SNAPCRAFT_PROJECT_DIR}"/patches/*; do
-        (cd "${SNAPCRAFT_PART_SRC}" && patch -p1 < "$p")
+      sed -i -e /url/s,git@github.com:,https://github.com/, ${CRAFT_PART_SRC}/.gitmodules
+      git -C ${CRAFT_PART_SRC} submodule update --init
+      for p in "${CRAFT_PROJECT_DIR}"/patches/*; do
+        (cd "${CRAFT_PART_SRC}" && patch -p1 < "$p")
       done
     override-build: |
       set -eu
       export LANG=C.UTF-8
-      export CABALARGS="-j${SNAPCRAFT_PARALLEL_BUILD_COUNT}"
+      export CABALARGS="-j${CRAFT_PARALLEL_BUILD_COUNT}"
 
-      cd "${SNAPCRAFT_PART_BUILD}"
-      ./scripts/local-mkrelease.sh
+      cd "${CRAFT_PART_BUILD}"
+      bash -x ./scripts/local-mkrelease.sh
 
       TAR=$(ls matterhorn-*.tar.* -1)
       echo "Unpacking ${TAR}..."
-      mkdir -p "${SNAPCRAFT_PART_INSTALL}/app"
-      tar jxvf "${TAR}" -C "${SNAPCRAFT_PART_INSTALL}/app" --strip-components=1
-      install -m 755 ${SNAPCRAFT_PROJECT_DIR}/launcher -D ${SNAPCRAFT_PART_INSTALL}/bin/matterhorn -v
+      mkdir -p "${CRAFT_PART_INSTALL}/app"
+      tar jxvf "${TAR}" -C "${CRAFT_PART_INSTALL}/app" --strip-components=1
+      install -m 755 ${CRAFT_PROJECT_DIR}/launcher -D ${CRAFT_PART_INSTALL}/bin/matterhorn -v
       rm -f "${TAR}"
 
-      snapcraftctl set-version "$(git describe --tags)"
+      craftctl set version="$(git describe --tags)"
     build-packages:
       - cabal-install
       - ghc
@@ -179,17 +174,17 @@ parts:
       - aspell-id
     override-build: |
       set -eu
-      snapcraftctl build
+      craftctl default
 
-      aspell_dicts_path=${SNAPCRAFT_PART_INSTALL}/usr/lib/aspell
+      aspell_dicts_path=${CRAFT_PART_INSTALL}/usr/lib/aspell
 
       function fix_absolute_links() {
         for i in "$aspell_dicts_path"/*.rws; do
           if [ -L "$i" ]; then
             local lnk=$(readlink "$i");
             if [[ "$lnk" == /* ]]; then
-              if [[ "$lnk" != "${SNAPCRAFT_PART_INSTALL}"* ]]; then
-                lnk="${SNAPCRAFT_PART_INSTALL}/$lnk"
+              if [[ "$lnk" != "${CRAFT_PART_INSTALL}"* ]]; then
+                lnk="${CRAFT_PART_INSTALL}/$lnk"
                 ln -sfv "$lnk" "$i"
               fi
               local rel_lnk="$(realpath --relative-to="$aspell_dicts_path" "$i")"
@@ -200,7 +195,7 @@ parts:
       }
 
       function ensure_compat_files() {
-        local vardir="${SNAPCRAFT_PART_INSTALL}/var/lib/aspell"
+        local vardir="${CRAFT_PART_INSTALL}/var/lib/aspell"
         for i in "$aspell_dicts_path"/*.dat; do
           local lang="$(basename "$i" .dat)"
           local compat="$vardir/$lang.compat"
@@ -214,8 +209,8 @@ parts:
 
       aspell_autobuildhash="$(command -v aspell-autobuildhash)"
       update_dictcommon_aspell="$(command -v update-dictcommon-aspell)"
-      sed -i "s,\([\"']\)/\(usr\|var\|etc\)/,\1${SNAPCRAFT_PART_INSTALL}/\2/,g" \
-        "${SNAPCRAFT_PART_INSTALL}/usr/share/perl5/Debian/DictionariesCommon.pm" \
+      sed -i "s,\([\"']\)/\(usr\|var\|etc\)/,\1${CRAFT_PART_INSTALL}/\2/,g" \
+        "${CRAFT_PART_INSTALL}/usr/share/perl5/Debian/DictionariesCommon.pm" \
         "$aspell_autobuildhash" \
         "$update_dictcommon_aspell"
       sed -i '/dico_checkroot.*s()/d' \
@@ -223,7 +218,7 @@ parts:
         "$update_dictcommon_aspell"
 
       # export DICT_COMMON_DEBUG=1
-      export PERL5LIB=${SNAPCRAFT_PART_INSTALL}/usr/share/perl5
+      export PERL5LIB=${CRAFT_PART_INSTALL}/usr/share/perl5
 
       ensure_compat_files
       "$update_dictcommon_aspell"
@@ -250,12 +245,12 @@ parts:
       build_snaps=core20
       for snap in $build_snaps; do
         cd "/snap/$snap/current" && \
-        find . -type f,l -exec rm -fv "$SNAPCRAFT_PRIME/{}" "$SNAPCRAFT_PRIME/usr/{}" \;
+        find . -type f,l -exec rm -fv "$CRAFT_PRIME/{}" "$CRAFT_PRIME/usr/{}" \;
       done
       for CRUFT in bug lintian man; do
-        rm -rf $SNAPCRAFT_PRIME/usr/share/$CRUFT
+        rm -rf $CRAFT_PRIME/usr/share/$CRUFT
       done
-      find $SNAPCRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
-      find $SNAPCRAFT_PRIME/usr/share -type d -empty -delete
-      find $SNAPCRAFT_PRIME/usr -type d -name perl5 -exec rm -frv "{}" \;
-      rm -rf $SNAPCRAFT_PRIME/usr/share/man
+      find $CRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
+      find $CRAFT_PRIME/usr/share -type d -empty -delete
+      find $CRAFT_PRIME/usr -type d -name perl5 -exec rm -frv "{}" \;
+      rm -rf $CRAFT_PRIME/usr/share/man
