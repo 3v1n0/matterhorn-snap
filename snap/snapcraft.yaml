@@ -101,6 +101,11 @@ parts:
       - jq
       - neovim
       - xclip
+    override-build: |
+      craftctl default
+
+      install -m 755 ${CRAFT_PROJECT_DIR}/secret-tool.wrapper \
+        -D ${CRAFT_PART_INSTALL}/usr/sbin/secret-tool -v
 
   dictionaries:
     plugin: nil
