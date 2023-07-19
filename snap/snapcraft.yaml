@@ -51,6 +51,16 @@ parts:
     source-branch: develop
     plugin: nil
     override-pull: |
+      cabal --version
+      cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-update
+
+      # Workarounds https://github.com/haskell/cabal/issues/5516
+      echo "" | cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-repl -w ghc --build-dep fail
+      cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-install Cabal cabal-install
+      ln -svf $HOME/.cabal/bin/cabal $(command -v cabal)
+      cabal --version
+      cabal user-config update
+
       # FIXME: We need a way to make snapcraft not to use --recursive, but
       # We keep the source and branch stuff for future and to get git deps
       # snapcraftctl pull
@@ -61,16 +71,6 @@ parts:
       for p in "${SNAPCRAFT_PROJECT_DIR}"/patches/*; do
         (cd "${SNAPCRAFT_PART_SRC}" && patch -p1 < "$p")
       done
-
-      cabal --version
-      cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-update
-
-      # Workarounds https://github.com/haskell/cabal/issues/5516
-      echo "" | cabal new-repl -w ghc --build-dep fail
-      cabal -j${SNAPCRAFT_PARALLEL_BUILD_COUNT} new-install Cabal cabal-install
-      ln -svf $HOME/.cabal/bin/cabal $(command -v cabal)
-      cabal --version
-      cabal user-config update
     override-build: |
       set -eu
       export LANG=C.UTF-8
