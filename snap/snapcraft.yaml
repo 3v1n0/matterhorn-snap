@@ -50,7 +50,7 @@ parts:
     source: https://github.com/matterhorn-chat/matterhorn.git
     plugin: nil
     override-pull: |
-      GIT_TAG="50200.17.0"
+      GIT_TAG="50200.19.0"
       # FIXME: We need a way to make snapcraft not to use --recursive, but
       # We keep the source and branch stuff for future and to get git deps
       # snapcraftctl pull
