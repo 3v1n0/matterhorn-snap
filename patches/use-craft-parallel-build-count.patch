@@ -7,4 +7,4 @@ index c3091195..485c9204 100755
  HERE=$(cd `dirname $0`; pwd)
  cd $HERE
 -cabal new-build -j --enable-tests
-+cabal new-build --enable-tests
++cabal new-build -j${CRAFT_PARALLEL_BUILD_COUNT} --enable-tests
