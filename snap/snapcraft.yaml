@@ -98,6 +98,7 @@ parts:
     stage-packages:
       - libsecret-tools
       - libnotify-bin
+      - jq
       - neovim
       - xclip
 
