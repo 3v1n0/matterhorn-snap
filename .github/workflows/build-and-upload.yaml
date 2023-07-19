@@ -28,6 +28,7 @@ jobs:
         matterhorn -m -f markdown
         matterhorn -k
     - name: Publish
+      if: github.event_name != 'pull_request'
       uses: snapcore/action-publish@v1
       env:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
@@ -35,12 +36,15 @@ jobs:
         snap: ${{ steps.snapcraft-build.outputs.snap }}
         release: edge
     - name: Promote stable versions
-      if: github.ref_name == 'master' || github.ref_name == 'stable'
+      if: |
+        github.event_name != 'pull_request' &&
+        (github.ref_name == 'master' || github.ref_name == 'stable')
       env:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
       run: |
         snap_file=${{ steps.snapcraft-build.outputs.snap }}
         snap_name=$(echo "$snap_file" | grep "[a-z0-9]\+_" -o | head -1 | sed "s/_//")
+        snap_version=$(echo "$snap_file" | cut -d_ -f2)
         if echo "$snap_file" | grep -q "[a-z0-9]\+_[0-9.]\+_.*\.snap"; then
           echo "Stable version of $snap_name found, so let's promote it"
           # Sleep a bit, waiting the revision to be visible
