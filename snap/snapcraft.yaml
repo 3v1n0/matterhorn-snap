@@ -89,6 +89,7 @@ parts:
     build-packages:
       - cabal-install
       - ghc
+      - pkg-config
       - zlib1g-dev
     stage-packages:
       - libatomic1
