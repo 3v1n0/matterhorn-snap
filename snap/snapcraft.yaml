@@ -1,7 +1,7 @@
 name: matterhorn
 base: core22
 adopt-info: matterhorn
-summary: Matterhorn
+summary: Matterhorn Chat - CLI application for Mattermost
 description: |
   A feature-rich Unix terminal client for the Mattermost chat system
 
