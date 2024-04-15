@@ -50,9 +50,21 @@ jobs:
           echo "Stable version of $snap_name found, so let's promote it"
           # Sleep a bit, waiting the revision to be visible
           set -x
-          sleep 40
-          last_revision=$(snapcraft list-revisions $snap_name \
-            --arch="$(dpkg --print-architecture)" | \
-              head -n2 | tail -n1 | cut -f1 -d ' ')
+          start=$EPOCHSECONDS
+          while true; do
+            sleep 1
+            last_revision=$(snapcraft list-revisions $snap_name \
+              --arch="$SNAPCRAFT_ARCH_TRIPLET_BUILD_FOR" 2>/dev/null | \
+                grep -m1 -F "$snap_version" | head -n1 | cut -f1 -d ' ')
+            if [ -n "$last_revision" ]; then
+              break
+            fi
+
+            if (( EPOCHSECONDS-start > 40 )); then
+              echo "Can't find last snap version!"
+              exit 1
+            fi
+          done
+
           snapcraft release $snap_name $last_revision stable
         fi
