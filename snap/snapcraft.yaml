@@ -59,7 +59,7 @@ parts:
       # FIXME: We need a way to make snapcraft not to use --recursive, but
       # We keep the source and branch stuff for future and to get git deps
       # craftctl default
-      GIT_TAG="90000.0.0"
+      GIT_TAG="90000.0.1"
       git clone --bare https://github.com/matterhorn-chat/matterhorn.git \
         "${CRAFT_PART_SRC}/.git"
       git -C ${CRAFT_PART_SRC} config --unset core.bare
