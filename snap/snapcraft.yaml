@@ -214,6 +214,9 @@ parts:
         done
       }
 
+      ln -sv /usr/share/perl5/Debian/* \
+        ${CRAFT_PART_INSTALL}/usr/share/perl5/Debian/ || true
+
       aspell_autobuildhash="$(command -v aspell-autobuildhash)"
       update_dictcommon_aspell="$(command -v update-dictcommon-aspell)"
       sed -i "s,\([\"']\)/\(usr\|var\|etc\)/,\1${CRAFT_PART_INSTALL}/\2/,g" \
@@ -234,6 +237,7 @@ parts:
 
     build-packages:
       - dictionaries-common
+      - libdebhelper-perl
       - libaspell15
     stage:
       - -usr/sbin
