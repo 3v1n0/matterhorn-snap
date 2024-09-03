@@ -229,7 +229,9 @@ parts:
       sed -i 's/mymessage\([ (]\)/debugprint\1/g' \
         "$aspell_autobuildhash"
 
-      # export DICT_COMMON_DEBUG=1
+      if [ "$CRAFT_VERBOSITY_LEVEL" == "TRACE" ]; then
+        export DICT_COMMON_DEBUG=1
+      fi
       export PERL5LIB=${CRAFT_PART_INSTALL}/usr/share/perl5
 
       ensure_compat_files
