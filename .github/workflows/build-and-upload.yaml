@@ -54,7 +54,7 @@ jobs:
           while true; do
             sleep 1
             last_revision=$(snapcraft list-revisions $snap_name \
-              --arch="$SNAPCRAFT_ARCH_TRIPLET_BUILD_FOR" 2>/dev/null | \
+              --arch="$CRAFT_ARCH_TRIPLET_BUILD_FOR" 2>/dev/null | \
                 grep -m1 -F "$snap_version" | head -n1 | cut -f1 -d ' ')
             if [ -n "$last_revision" ]; then
               break
