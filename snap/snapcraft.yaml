@@ -226,6 +226,8 @@ parts:
       sed -i '/dico_checkroot.*s()/d' \
         "$aspell_autobuildhash" \
         "$update_dictcommon_aspell"
+      sed -i 's/mymessage\([ (]\)/debugprint\1/g' \
+        "$aspell_autobuildhash"
 
       # export DICT_COMMON_DEBUG=1
       export PERL5LIB=${CRAFT_PART_INSTALL}/usr/share/perl5
