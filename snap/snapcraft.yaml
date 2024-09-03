@@ -1,5 +1,5 @@
 name: matterhorn
-base: core22
+base: core24
 adopt-info: matterhorn
 summary: Matterhorn Chat - CLI application for Mattermost
 description: |
@@ -246,10 +246,10 @@ parts:
       - integration-tools
       - matterhorn
     plugin: nil
-    build-snaps: [core20]
+    build-snaps: [core24]
     override-prime: |
       set -eux
-      build_snaps=core20
+      build_snaps=core24
       for snap in $build_snaps; do
         cd "/snap/$snap/current" && \
         find . -type f,l -exec rm -fv "$CRAFT_PRIME/{}" "$CRAFT_PRIME/usr/{}" \;
