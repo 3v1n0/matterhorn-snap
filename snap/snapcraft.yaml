@@ -1,7 +1,7 @@
 name: matterhorn
-base: core22
+base: core24
 adopt-info: matterhorn
-summary: Matterhorn
+summary: Matterhorn Chat - CLI application for Mattermost
 description: |
   A feature-rich Unix terminal client for the Mattermost chat system
 
@@ -214,6 +214,9 @@ parts:
         done
       }
 
+      ln -sv /usr/share/perl5/Debian/* \
+        ${CRAFT_PART_INSTALL}/usr/share/perl5/Debian/ || true
+
       aspell_autobuildhash="$(command -v aspell-autobuildhash)"
       update_dictcommon_aspell="$(command -v update-dictcommon-aspell)"
       sed -i "s,\([\"']\)/\(usr\|var\|etc\)/,\1${CRAFT_PART_INSTALL}/\2/,g" \
@@ -223,8 +226,12 @@ parts:
       sed -i '/dico_checkroot.*s()/d' \
         "$aspell_autobuildhash" \
         "$update_dictcommon_aspell"
+      sed -i 's/mymessage\([ (]\)/debugprint\1/g' \
+        "$aspell_autobuildhash"
 
-      # export DICT_COMMON_DEBUG=1
+      if [ "$CRAFT_VERBOSITY_LEVEL" == "TRACE" ]; then
+        export DICT_COMMON_DEBUG=1
+      fi
       export PERL5LIB=${CRAFT_PART_INSTALL}/usr/share/perl5
 
       ensure_compat_files
@@ -234,6 +241,7 @@ parts:
 
     build-packages:
       - dictionaries-common
+      - libdebhelper-perl
       - libaspell15
     stage:
       - -usr/sbin
@@ -246,10 +254,10 @@ parts:
       - integration-tools
       - matterhorn
     plugin: nil
-    build-snaps: [core20]
+    build-snaps: [core24]
     override-prime: |
       set -eux
-      build_snaps=core20
+      build_snaps=core24
       for snap in $build_snaps; do
         cd "/snap/$snap/current" && \
         find . -type f,l -exec rm -fv "$CRAFT_PRIME/{}" "$CRAFT_PRIME/usr/{}" \;
